@@ -1472,7 +1472,7 @@ export async function processJsonDataAsync(
     
     // Build metadata
     const metadata: Metadata = {
-      market_name: 'Sustainable Flooring Market',
+      market_name: 'Flooring Market',
       market_type: 'Market Analysis',
       industry: 'Building & Construction',
       years: allYears,
