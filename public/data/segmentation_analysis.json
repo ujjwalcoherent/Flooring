@@ -1,28 +1,64 @@
 {
   "Global": {
-    "By Type": {
-      "Sub-Normothermic Perfusion (20–34°C)": {},
-      "Warm or Normothermic Perfusion (35–37°C)": {}
+    "By Product Type": {
+      "Bamboo Flooring": {},
+      "Cork Flooring": {},
+      "Reclaimed Wood Flooring": {},
+      "Linoleum Flooring": {},
+      "Natural Stone Flooring": {},
+      "Recycled Carpet Tiles": {},
+      "Recycled Rubber Flooring": {},
+      "Eco-friendly Vinyl Flooring": {},
+      "Engineered Wood Flooring": {},
+      "Other Sustainable Flooring Materials": {}
     },
-    "By Organ Type": {
-      "Liver": {},
-      "Heart": {},
-      "Lung": {},
-      "Kidney": {},
-      "Others (Pancreas, Small bowel / Intestine, Composite Tissues / Limb Perfusion (emerging use cases))": {}
+    "By Material Source": {
+      "Natural Materials": {},
+      "Recycled Materials": {},
+      "Renewable Materials": {},
+      "Low-VOC / Non-toxic Materials": {}
     },
-    "Application / Use Case": {
-      "Organ Preservation": {},
-      "Viability Assessment": {},
-      "Physiologic Transport": {},
-      "Reconditioning Marginal Organs": {},
-      "Others (Research Use / Protocol development)": {}
+    "By Flooring Format": {
+      "Tiles": {},
+      "Planks": {},
+      "Sheets": {},
+      "Rolls": {},
+      "Mats / Modular Blocks": {}
     },
-    "By End User": {
-      "Hospitals & Clinics": {},
-      "Specialty Clinic/Centers": {},
-      "Transplant Centers": {},
-      "Others (Research Institutes/Centers, Organ Procurement Organizations, etc.)": {}
+    "By Installation Type": {
+      "Glue-down Flooring": {},
+      "Click-lock / Floating Flooring": {},
+      "Nail-down Flooring": {},
+      "Peel-and-stick Flooring": {},
+      "Loose-lay Flooring": {}
+    },
+    "By Price Range": {
+      "Economy": {},
+      "Mid-range": {},
+      "Premium": {}
+    },
+    "By End-use Sector": {
+      "Residential": {},
+      "Commercial": {
+        "Offices": {},
+        "Retail Spaces": {},
+        "Hospitality Spaces": {}
+      },
+      "Institutional": {
+        "Educational Buildings": {},
+        "Healthcare Facilities": {},
+        "Government Buildings": {},
+        "Public Infrastructure Spaces": {}
+      },
+      "Industrial": {
+        "Light Industrial Facilities": {},
+        "Warehouses": {},
+        "Utility / Service Buildings": {}
+      }
+    },
+    "By Distribution Channel": {
+      "Direct": {},
+      "Indirect (via. Distributors)": {}
     },
     "By Region": {
       "North America": {

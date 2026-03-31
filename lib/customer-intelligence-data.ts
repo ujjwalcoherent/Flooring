@@ -20,21 +20,27 @@ export interface CustomerIntelligenceData {
 
 // Realistic customer name generators by type
 const residentialNames = [
-  'Solar Home', 'Rooftop Solar', 'Green Energy Home', 'SunPower Residential',
-  'HomeGrid Solar', 'Bright Home Energy', 'SolarEdge Home', 'EcoHome Solar',
-  'Smart Home Solar', 'Residential Power'
+  'GreenHome Floors', 'EcoLiving Interiors', 'Sustainable Home Design', 'NatureWood Homes',
+  'BambooLife Residential', 'CorkComfort Living', 'EcoFloor Home', 'GreenBuild Homes',
+  'Reclaimed Living', 'Natural Stone Residences'
 ]
 
 const commercialNames = [
-  'Industrial Solar Park', 'Commercial Solar Solutions', 'Business Energy Center',
-  'Solar Power Plant', 'Corporate Solar Hub', 'Enterprise Energy', 'Solar Campus',
-  'Factory Solar System'
+  'GreenOffice Solutions', 'EcoCommercial Interiors', 'Sustainable Retail Design',
+  'CorkFloor Commercial', 'BambooTech Offices', 'EcoHospitality Floors', 'GreenSpace Commercial',
+  'Sustainable Workspace Design'
 ]
 
-const utilityNames = [
-  'Grid-Scale Solar Farm', 'Utility Solar Station', 'Power Grid Solar',
-  'Megawatt Solar Park', 'Regional Solar Utility', 'Solar Generation Station',
-  'Grid Solar Complex', 'Utility Power Station'
+const institutionalNames = [
+  'GreenSchool Flooring', 'EcoHealth Facilities', 'Sustainable Campus Design',
+  'Government Green Build', 'Public EcoFloor Projects', 'Institutional Green Interiors',
+  'Healthcare Sustainable Floors', 'Education Green Build'
+]
+
+const industrialNames = [
+  'EcoWarehouse Floors', 'Industrial GreenFloor', 'Sustainable Factory Solutions',
+  'Light Industrial EcoFloor', 'Green Utility Spaces', 'Industrial Cork Solutions',
+  'Recycled Rubber Industrial', 'GreenPlant Flooring'
 ]
 
 const locationSuffixes = [
@@ -59,10 +65,12 @@ function generateCustomerName(region: string, endUserSegment: string, index: num
   let baseName = ''
   if (endUserSegment === 'Residential') {
     baseName = residentialNames[index % residentialNames.length]
-  } else if (endUserSegment === 'Commercial and Industrial') {
+  } else if (endUserSegment === 'Commercial') {
     baseName = commercialNames[index % commercialNames.length]
+  } else if (endUserSegment === 'Institutional') {
+    baseName = institutionalNames[index % institutionalNames.length]
   } else {
-    baseName = utilityNames[index % utilityNames.length]
+    baseName = industrialNames[index % industrialNames.length]
   }
 
   return `${prefix} ${baseName} ${location}`
@@ -95,8 +103,9 @@ function generateCustomerCount(region: string, endUserSegment: string): number {
   // Base multipliers by end user type
   const segmentMultipliers: Record<string, number> = {
     'Residential': 1.5,              // Most common
-    'Commercial and Industrial': 1.0, // Medium
-    'Utility-scale': 0.4              // Fewer but larger projects
+    'Commercial': 1.0,               // Medium
+    'Institutional': 0.7,            // Fewer projects
+    'Industrial': 0.4                // Fewer but larger projects
   }
 
   // Base count range
@@ -134,8 +143,9 @@ export function generateCustomerIntelligenceData(): CustomerIntelligenceData[] {
 
   const endUserSegments = [
     'Residential',
-    'Commercial and Industrial',
-    'Utility-scale'
+    'Commercial',
+    'Institutional',
+    'Industrial'
   ]
 
   const data: CustomerIntelligenceData[] = []
@@ -153,7 +163,7 @@ export function generateCustomerIntelligenceData(): CustomerIntelligenceData[] {
           region,
           endUserSegment,
           type: endUserSegment === 'Residential' ? 'residential'
-                : endUserSegment === 'Commercial and Industrial' ? 'commercial'
+                : endUserSegment === 'Commercial' ? 'commercial'
                 : 'utility'
         })
       }
@@ -365,10 +375,12 @@ export function parseCustomerIntelligenceFromData(rows: Record<string, any>[]): 
       const lowerSegment = endUserSegment.toLowerCase()
       if (lowerSegment.includes('residential') || lowerSegment.includes('home')) {
         normalizedSegment = 'Residential'
-      } else if (lowerSegment.includes('commercial') || lowerSegment.includes('industrial')) {
-        normalizedSegment = 'Commercial and Industrial'
-      } else if (lowerSegment.includes('utility') || lowerSegment.includes('grid')) {
-        normalizedSegment = 'Utility-scale'
+      } else if (lowerSegment.includes('commercial') || lowerSegment.includes('office') || lowerSegment.includes('retail') || lowerSegment.includes('hospitality')) {
+        normalizedSegment = 'Commercial'
+      } else if (lowerSegment.includes('institutional') || lowerSegment.includes('education') || lowerSegment.includes('healthcare') || lowerSegment.includes('government')) {
+        normalizedSegment = 'Institutional'
+      } else if (lowerSegment.includes('industrial') || lowerSegment.includes('warehouse') || lowerSegment.includes('factory')) {
+        normalizedSegment = 'Industrial'
       } else {
         normalizedSegment = endUserSegment
       }
@@ -382,11 +394,14 @@ export function parseCustomerIntelligenceFromData(rows: Record<string, any>[]): 
         if (value.includes('residential') || value.includes('home')) {
           normalizedSegment = 'Residential'
           break
-        } else if (value.includes('commercial') || value.includes('industrial')) {
-          normalizedSegment = 'Commercial and Industrial'
+        } else if (value.includes('commercial') || value.includes('office') || value.includes('retail')) {
+          normalizedSegment = 'Commercial'
           break
-        } else if (value.includes('utility') || value.includes('grid')) {
-          normalizedSegment = 'Utility-scale'
+        } else if (value.includes('institutional') || value.includes('education') || value.includes('healthcare')) {
+          normalizedSegment = 'Institutional'
+          break
+        } else if (value.includes('industrial') || value.includes('warehouse') || value.includes('factory')) {
+          normalizedSegment = 'Industrial'
           break
         }
       }
@@ -402,7 +417,7 @@ export function parseCustomerIntelligenceFromData(rows: Record<string, any>[]): 
       region: normalizedRegion,
       endUserSegment: normalizedSegment,
       type: normalizedSegment === 'Residential' ? 'residential'
-            : normalizedSegment === 'Commercial and Industrial' ? 'commercial'
+            : normalizedSegment === 'Commercial' ? 'commercial'
             : 'utility'
     }
 
