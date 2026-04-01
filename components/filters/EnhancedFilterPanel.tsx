@@ -3,10 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useDashboardStore } from '@/lib/store'
 import { GeographyMultiSelect } from './GeographyMultiSelect'
-import { BusinessTypeFilter } from './BusinessTypeFilter'
 import { YearRangeSlider } from './YearRangeSlider'
 import { AggregationLevelSelector } from './AggregationLevelSelector'
-import { CascadeFilter } from './CascadeFilter'
 import { X, Plus, MapPin, Tag } from 'lucide-react'
 
 interface SelectedSegmentItem {
@@ -22,7 +20,6 @@ export function EnhancedFilterPanel() {
   )
   const [selectedSegments, setSelectedSegments] = useState<SelectedSegmentItem[]>([])
   const [currentSegmentSelection, setCurrentSegmentSelection] = useState<string>('')
-  const [cascadePath, setCascadePath] = useState<string[]>([])
 
   // Initialize selectedSegments from store filters when data loads
   useEffect(() => {
@@ -66,117 +63,106 @@ export function EnhancedFilterPanel() {
     // The data processor handles both datasets with the same segment types
   }, [filters.dataType])
   
-  // Clear selected segments when business type changes and segment type has B2B/B2C
   const segmentDimension = data?.dimensions?.segments?.[selectedSegmentType]
-  const hasB2BSegmentation = segmentDimension && (
-    (segmentDimension.b2b_hierarchy && Object.keys(segmentDimension.b2b_hierarchy).length > 0) ||
-    (segmentDimension.b2c_hierarchy && Object.keys(segmentDimension.b2c_hierarchy).length > 0) ||
-    (segmentDimension.b2b_items && segmentDimension.b2b_items.length > 0) ||
-    (segmentDimension.b2c_items && segmentDimension.b2c_items.length > 0)
-  )
-  
-  useEffect(() => {
-    if (hasB2BSegmentation && selectedSegments.length > 0) {
-      // Clear segments when business type changes for this segment type
-      setSelectedSegments([])
-      setCurrentSegmentSelection('')
-    }
-  }, [filters.businessType, selectedSegmentType, hasB2BSegmentation, selectedSegments.length])
 
-  // Use business-type specific hierarchy if available, otherwise use main hierarchy
-  let hierarchy = segmentDimension?.hierarchy || {}
-  if (hasB2BSegmentation) {
-    if (filters.businessType === 'B2B' && segmentDimension?.b2b_hierarchy) {
-      hierarchy = segmentDimension.b2b_hierarchy
-    } else if (filters.businessType === 'B2C' && segmentDimension?.b2c_hierarchy) {
-      hierarchy = segmentDimension.b2c_hierarchy
-    }
-  }
-  
-  // Filter available segments based on business type hierarchy
-  // Use the business-type specific items array if available (from new API)
-  let availableSegments: string[] = []
-  if (hasB2BSegmentation && (filters.businessType === 'B2B' || filters.businessType === 'B2C')) {
-    // Use the business-type specific items array from API if available
-    if (filters.businessType === 'B2B' && segmentDimension?.b2b_items) {
-      availableSegments = segmentDimension.b2b_items
-    } else if (filters.businessType === 'B2C' && segmentDimension?.b2c_items) {
-      availableSegments = segmentDimension.b2c_items
-      } else {
-        // Fallback: Extract all items from the business-type specific hierarchy ONLY
-        // Use array instead of Set to preserve intentional duplicates from JSON
-        const allHierarchyItems: string[] = []
-        
-        // Only process the selected business type hierarchy
-        const businessTypeRoot = filters.businessType
-        if (hierarchy[businessTypeRoot]) {
-          // Add root children - preserve duplicates if present
-          hierarchy[businessTypeRoot].forEach(item => allHierarchyItems.push(item))
-          
-          // Recursively add all descendants - preserve duplicates
-          const addDescendants = (parent: string) => {
-            if (hierarchy[parent]) {
-              hierarchy[parent].forEach(child => {
-                allHierarchyItems.push(child) // Allow duplicates
-                addDescendants(child)
-              })
-            }
-          }
-          hierarchy[businessTypeRoot].forEach(rootChild => addDescendants(rootChild))
-        }
-        
-        // Also add all keys from hierarchy that are not the business type root
-        Object.keys(hierarchy).forEach(key => {
-          if (key !== businessTypeRoot && key !== 'B2B' && key !== 'B2C') {
-            allHierarchyItems.push(key) // Allow duplicates
-          }
-        })
-        
-        availableSegments = allHierarchyItems // Preserve duplicates from JSON
+  // Use main hierarchy directly - B2B/B2C are treated as regular segments
+  const hierarchy = segmentDimension?.hierarchy || {}
+
+  // Get available segments from dimension items, or extract from hierarchy
+  let availableSegments: string[] = segmentDimension?.items || []
+  if (availableSegments.length === 0 && hierarchy && Object.keys(hierarchy).length > 0) {
+    const allSegmentsFromHierarchy = new Set<string>()
+    Object.keys(hierarchy).forEach(key => allSegmentsFromHierarchy.add(key))
+    Object.values(hierarchy).forEach((children: any) => {
+      if (Array.isArray(children)) {
+        children.forEach((child: string) => allSegmentsFromHierarchy.add(child))
       }
-  } else {
-    // Use items array from segment dimension, or extract from hierarchy if items is empty
-    availableSegments = segmentDimension?.items || []
-    
-    // If items is empty but hierarchy exists, extract all segments from hierarchy
-    if (availableSegments.length === 0 && hierarchy && Object.keys(hierarchy).length > 0) {
-      const allSegmentsFromHierarchy = new Set<string>()
-      // Add all keys (parents)
-      Object.keys(hierarchy).forEach(key => allSegmentsFromHierarchy.add(key))
-      // Add all values (children)
-      Object.values(hierarchy).forEach((children: any) => {
-        if (Array.isArray(children)) {
-          children.forEach((child: string) => allSegmentsFromHierarchy.add(child))
-        }
-      })
-      availableSegments = Array.from(allSegmentsFromHierarchy)
-    }
+    })
+    availableSegments = Array.from(allSegmentsFromHierarchy)
   }
   
-  // Build hierarchical options for the select (only used for flat segments fallback)
-  // This function is now only used when there's no hierarchy, so we don't need complex recursion
+  // Build hierarchical options for the select - shows ALL segments (parents and leaves)
+  // in a flat indented list so users can select any segment at any level
   const getHierarchicalOptions = () => {
     // If no hierarchy and no available segments, return empty
     if (Object.keys(hierarchy).length === 0 && availableSegments.length === 0) {
       return []
     }
-    
+
     // If hierarchy is empty, just return flat list from availableSegments
     if (Object.keys(hierarchy).length === 0) {
       // Deduplicate available segments
       const uniqueSegments = Array.from(new Set(availableSegments))
-      return uniqueSegments.map((s: string, index: number) => ({ 
-        value: s, 
-        label: s, 
-        level: 0, 
-        isParent: false, 
-        uniqueKey: `${s}::${index}` 
+      return uniqueSegments.map((s: string, index: number) => ({
+        value: s,
+        label: s,
+        level: 0,
+        isParent: false,
+        uniqueKey: `${s}::${index}`
       }))
     }
-    
-    // For hierarchical data, we now use CascadeFilter, so return empty array
-    // This prevents the infinite recursion issue
-    return []
+
+    // Build a flat indented list from the hierarchy
+    const options: Array<{value: string, label: string, level: number, isParent: boolean, uniqueKey: string}> = []
+    const processed = new Set<string>()
+
+    const addWithChildren = (segment: string, level: number, parentPath: string[] = []) => {
+      const uniqueId = `${segment}::${parentPath.join('::')}`
+      if (processed.has(uniqueId)) return
+      processed.add(uniqueId)
+
+      const contextKey = parentPath.length > 0 ? `${segment}::${parentPath.join('::')}` : segment
+      const children = hierarchy[contextKey] || hierarchy[segment] || []
+      const isParent = children.length > 0
+
+      const prefix = level > 0 ? '\u00A0\u00A0'.repeat(level) + '\u2514 ' : ''
+      options.push({
+        value: segment,
+        label: prefix + segment,
+        level,
+        isParent,
+        uniqueKey: uniqueId
+      })
+
+      if (children.length > 0) {
+        const newParentPath = [...parentPath, segment]
+        children.forEach((child: string) => {
+          addWithChildren(child, level + 1, newParentPath)
+        })
+      }
+    }
+
+    // Find root segments (parents that aren't children of anyone)
+    const allChildren = new Set<string>()
+    Object.values(hierarchy).forEach((children: any) => {
+      if (Array.isArray(children)) {
+        children.forEach((child: string) => allChildren.add(child))
+      }
+    })
+
+    let roots: string[] = []
+
+    // Parents that aren't children of anyone
+    Object.keys(hierarchy).forEach(parent => {
+      if (!allChildren.has(parent)) roots.push(parent)
+    })
+
+    // Standalone segments (in items but not in hierarchy at all)
+    availableSegments.forEach((segment: string) => {
+      if (!allChildren.has(segment) && !hierarchy[segment]) {
+        roots.push(segment)
+      }
+    })
+
+    roots.forEach(root => addWithChildren(root, 0, []))
+
+    if (options.length === 0) {
+      return availableSegments.map((s: string, index: number) => ({
+        value: s, label: s, level: 0, isParent: false, uniqueKey: `${s}::${index}`
+      }))
+    }
+
+    return options
   }
   
   const hierarchicalOptions = getHierarchicalOptions()
@@ -348,10 +334,6 @@ export function EnhancedFilterPanel() {
         )}
       </div>
 
-      {/* Business Type Filter */}
-      <div className="border-t pt-4">
-        <BusinessTypeFilter />
-      </div>
 
       {/* Segment Selection Section */}
       <div className="space-y-2">
@@ -370,7 +352,6 @@ export function EnhancedFilterPanel() {
               const newSegmentType = e.target.value
               setSelectedSegmentType(newSegmentType)
               setCurrentSegmentSelection('') // Clear selection when type changes
-              setCascadePath([]) // Clear cascade path when type changes
               // Update store - this will trigger save/restore of geography filters
               updateFilters({ 
                 segmentType: newSegmentType,
@@ -385,17 +366,16 @@ export function EnhancedFilterPanel() {
           </select>
         </div>
 
-        {/* Cascade Filter - Step 2 */}
+        {/* Segment Selector - Step 2 */}
         <div>
           <label className="block text-xs text-black mb-1">
             Step 2: Select Segment from {selectedSegmentType}
           </label>
-          {Object.keys(hierarchy).length === 0 && availableSegments.length === 0 ? (
+          {hierarchicalOptions.length === 0 && availableSegments.length === 0 ? (
             <div className="w-full px-3 py-2 border border-yellow-300 rounded-md mb-2 bg-yellow-50 text-yellow-800 text-sm">
-              ⚠️ No segments available for this segment type. Please check your data structure.
+              No segments available for this segment type. Please check your data structure.
             </div>
-          ) : Object.keys(hierarchy).length === 0 && availableSegments.length > 0 ? (
-            // Fallback for flat segments (no hierarchy)
+          ) : (
             <>
               <select
                 value={currentSegmentSelection}
@@ -403,13 +383,17 @@ export function EnhancedFilterPanel() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 text-black"
               >
                 <option value="">Select a segment...</option>
-                {availableSegments.map((segment) => (
-                  <option key={segment} value={segment}>
-                    {segment}
+                {hierarchicalOptions.map((option) => (
+                  <option
+                    key={option.uniqueKey}
+                    value={option.value}
+                    style={{ fontWeight: option.isParent ? 'bold' : 'normal' }}
+                  >
+                    {option.label}
                   </option>
                 ))}
               </select>
-              
+
               <button
                 onClick={handleAddSegment}
                 disabled={!currentSegmentSelection}
@@ -418,67 +402,6 @@ export function EnhancedFilterPanel() {
                 <Plus className="h-4 w-4" />
                 <span>Add Selected Segment</span>
               </button>
-            </>
-          ) : (
-            // Hierarchical segments - use cascade filter
-            <>
-              <CascadeFilter
-                hierarchy={hierarchy}
-                selectedPath={cascadePath}
-                onSelectionChange={(path) => {
-                  setCascadePath(path)
-                  // Update currentSegmentSelection to the last item in path for compatibility
-                  if (path.length > 0) {
-                    setCurrentSegmentSelection(path[path.length - 1])
-                  } else {
-                    setCurrentSegmentSelection('')
-                  }
-                }}
-                maxLevels={5}
-                placeholder="Select sub-segment 1..."
-              />
-              
-              {/* Add Button - Only show if a path is selected */}
-              {cascadePath.length > 0 && (
-                <button
-                  onClick={() => {
-                    // Use the last item in the path as the segment
-                    const segmentToAdd = cascadePath[cascadePath.length - 1]
-                    if (segmentToAdd) {
-                      const id = `${selectedSegmentType}::${segmentToAdd}`
-                      // Check if this exact segment+type combination already exists
-                      const exists = selectedSegments.find(s => s.segment === segmentToAdd && s.type === selectedSegmentType)
-                      
-                      if (!exists) {
-                        const newSegment = {
-                          type: selectedSegmentType,
-                          segment: segmentToAdd,
-                          id: id
-                        }
-                        
-                        const updated = [...selectedSegments, newSegment]
-                        setSelectedSegments(updated)
-                        
-                        console.log('🔧 EnhancedFilterPanel: Cascade selection, preserving aggregationLevel:', filters.aggregationLevel)
-                        updateFilters({ 
-                          segments: updated.map(s => s.segment) || [],
-                          segmentType: selectedSegmentType || '',
-                          advancedSegments: updated || [],
-                          aggregationLevel: filters.aggregationLevel !== undefined ? filters.aggregationLevel : null // Preserve aggregation level
-                        } as any)
-                      }
-                      
-                      // Clear cascade selection after adding
-                      setCascadePath([])
-                      setCurrentSegmentSelection('')
-                    }
-                  }}
-                  className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add Selected Segment</span>
-                </button>
-              )}
             </>
           )}
         </div>

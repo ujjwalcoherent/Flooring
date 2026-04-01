@@ -879,30 +879,9 @@ async function processSegmentTypeAsync(
               }
             })
 
-            // Check for B2B/B2C
-            const level1 = segmentPath[0] || ''
-            if (level1 === 'B2B' || level1 === 'B2C') {
-              const segment = segmentPath[segmentPath.length - 1] || ''
-              if (segment && segment.trim() !== '') {
-                if (level1 === 'B2B') {
-                  const parentKey = segmentPath[1] || ''
-                  if (parentKey && !b2bHierarchy[parentKey]) {
-                    b2bHierarchy[parentKey] = []
-                  }
-                  if (!b2bItems.includes(segment)) {
-                    b2bItems.push(segment)
-                  }
-                } else {
-                  const parentKey = segmentPath[1] || ''
-                  if (parentKey && !b2cHierarchy[parentKey]) {
-                    b2cHierarchy[parentKey] = []
-                  }
-                  if (!b2cItems.includes(segment)) {
-                    b2cItems.push(segment)
-                  }
-                }
-              }
-            }
+            // B2B/B2C detection disabled: B2B and B2C are treated as regular segments
+            // in the hierarchy (e.g., under "By Distribution Channel"), not as separate
+            // business type filters that split the entire segment view.
           })
         }
 
@@ -1483,7 +1462,7 @@ export async function processJsonDataAsync(
       forecast_years: allYears.filter(y => y > historicalEndYear),
       currency: 'USD',
       value_unit: 'Million',
-      volume_unit: 'Million Units',
+      volume_unit: 'Square Mtr.',
       has_value: valueRecords.length > 0,
       has_volume: volumeRecords.length > 0,
     }

@@ -1,64 +1,93 @@
 {
   "Global": {
     "By Product Type": {
+      "Resilient Flooring": {
+        "Luxury Vinyl Tile (LVT)": {},
+        "Luxury Vinyl Plank (LVP)": {},
+        "Vinyl Sheet Flooring": {},
+        "PVC-free Resilient Flooring": {},
+        "Rigid Core Resilient Flooring": {}
+      },
+      "Linoleum Flooring": {},
+      "Wood Flooring": {
+        "Solid Hardwood Flooring": {},
+        "Engineered Wood Flooring": {},
+        "Reclaimed Wood Flooring": {}
+      },
       "Bamboo Flooring": {},
       "Cork Flooring": {},
-      "Reclaimed Wood Flooring": {},
-      "Linoleum Flooring": {},
-      "Natural Stone Flooring": {},
-      "Recycled Carpet Tiles": {},
-      "Recycled Rubber Flooring": {},
-      "Eco-friendly Vinyl Flooring": {},
-      "Engineered Wood Flooring": {},
-      "Other Sustainable Flooring Materials": {}
+      "Rubber Flooring": {},
+      "Textile Flooring": {
+        "Natural Fiber Carpets": {},
+        "Recycled Fiber Carpets": {}
+      },
+      "Terrazzo Flooring": {},
+      "Other Recycled-Content Flooring": {}
     },
-    "By Material Source": {
-      "Natural Materials": {},
+    "By Thickness": {
+      "Up to 2 mm": {},
+      "2 mm to 4 mm": {},
+      "4 mm to 6 mm": {},
+      "6 mm to 8 mm": {},
+      "8 mm to 12 mm": {},
+      "Above 12 mm": {}
+    },
+    "By Material Type": {
+      "Natural Renewable Materials": {},
+      "Sustainably Sourced Wood Materials": {},
       "Recycled Materials": {},
-      "Renewable Materials": {},
-      "Low-VOC / Non-toxic Materials": {}
+      "Mineral & Inorganic Materials": {},
+      "Polymer-Based Sustainable Materials": {}
     },
     "By Flooring Format": {
       "Tiles": {},
       "Planks": {},
-      "Sheets": {},
-      "Rolls": {},
-      "Mats / Modular Blocks": {}
+      "Sheet / Roll": {}
     },
     "By Installation Type": {
-      "Glue-down Flooring": {},
-      "Click-lock / Floating Flooring": {},
-      "Nail-down Flooring": {},
-      "Peel-and-stick Flooring": {},
-      "Loose-lay Flooring": {}
+      "Glue-down / Dryback Flooring": {},
+      "Click-lock Flooring": {},
+      "Loose-lay Flooring": {},
+      "Peel-and-stick Flooring": {}
     },
-    "By Price Range": {
-      "Economy": {},
-      "Mid-range": {},
-      "Premium": {}
-    },
-    "By End-use Sector": {
+    "By Application": {
       "Residential": {},
       "Commercial": {
-        "Offices": {},
-        "Retail Spaces": {},
-        "Hospitality Spaces": {}
-      },
-      "Institutional": {
-        "Educational Buildings": {},
-        "Healthcare Facilities": {},
-        "Government Buildings": {},
-        "Public Infrastructure Spaces": {}
+        "Office Spaces": {},
+        "Retail Stores": {},
+        "Hotels & Restaurants": {},
+        "Others": {}
       },
       "Industrial": {
-        "Light Industrial Facilities": {},
+        "Factories": {},
         "Warehouses": {},
-        "Utility / Service Buildings": {}
+        "Others": {}
+      },
+      "Institutional": {
+        "Schools & Universities": {},
+        "Hospitals & Healthcare Facilities": {},
+        "Government & Administrative Buildings": {}
+      },
+      "Public Infrastructure": {
+        "Airports": {},
+        "Railway / Metro Stations": {},
+        "Parks & Recreational Spaces": {},
+        "Community & Civic Buildings": {}
       }
     },
     "By Distribution Channel": {
-      "Direct": {},
-      "Indirect (via. Distributors)": {}
+      "B2B": {},
+      "B2C": {
+        "Offline": {
+          "Home Improvement Stores": {},
+          "Specialized Flooring Retailers": {},
+          "Others": {}
+        },
+        "Online": {
+          "E-commerce Websites": {},
+          "Company Own Website": {}
+        }
+      }
     },
     "By Region": {
       "North America": {
